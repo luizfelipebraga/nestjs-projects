@@ -10,14 +10,15 @@ import { UserRepository } from './repositories/user-repository';
 @Module({
   imports: [],
   controllers: [AppController],
-  providers: [AppService,
+  providers: [
+    AppService,
     PrismaService,
     RedisService,
     PrismaUserRepository,
     {
       provide: UserRepository,
       useClass: RedisUserRepository,
-    }
+    },
   ],
 })
 export class AppModule {}
