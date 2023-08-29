@@ -7,7 +7,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 export class TasksService {
   private tasks: Task[] = [];
 
-  getAllTasks() {
+  getTasks() {
     return this.tasks;
   }
 
@@ -17,6 +17,13 @@ export class TasksService {
 
   deleteTaskById(taskId: string): void {
     this.tasks = this.tasks.filter(task => task.id !== taskId);
+  }
+
+  updateTaskById(taskId: string, status: TaskStatus) {
+    const task = this.getTaskById(taskId);
+    task.status = status;
+    console.log("tasks", task)
+    return task;
   }
 
   createTask(createTaskDto: CreateTaskDto): Task {
