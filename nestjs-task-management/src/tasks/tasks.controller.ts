@@ -36,7 +36,6 @@ export class TasksController {
 
   @Patch("/:id/status")
   updateTaskById(@Param('id') id: string, @Body() UpdateTaskStatus: UpdateTaskStatusDto): Task {
-    const { status } = UpdateTaskStatus
-    return this.tasksService.updateTaskById(id, status);
+    return this.tasksService.updateTaskById(id, UpdateTaskStatus);
   }
 }
