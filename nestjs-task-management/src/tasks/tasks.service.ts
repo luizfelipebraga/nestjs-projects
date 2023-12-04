@@ -1,20 +1,17 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { TaskStatus } from './task-status.enum';
+import { UpdateTaskStatusDto } from './dto/update-task.dto';
 import { Task } from './task.entity';
-import { TaskRepostory } from './tasks.repository';
+import { TaskRepository } from './tasks.repository';
 
 @Injectable()
 export class TasksService {
   constructor(
-    @InjectRepository(Task)
-    private taskRepository: TaskRepostory
+    private taskRepository: TaskRepository
   ) { }
 
-  async getTasks(): Promise<Task[]> {
-    const tasks = await this.taskRepository.find();
-    return tasks;
+  getTasks(): Promise<Task[]> {
+    return this.taskRepository.getTasks();
   }
 
   // getTasksWithFilters(filterDto: GetTasksFilterDto): Task[] {
@@ -37,48 +34,19 @@ export class TasksService {
   //   return tasks;
   // }
 
-  async getTaskById(id: string): Promise<Task> {
-    const foundTask = await this.taskRepository.findOneBy({ id })
-
-    if (!foundTask) throw new NotFoundException(`Task ${id} not found`);
-
-    return foundTask;
+  getTaskById(id: string): Promise<Task> {
+    return this.taskRepository.getById(id);
   }
 
-
-
-  async deleteTaskById(taskId: string): Promise<void> {
-    const foundTask = await this.getTaskById(taskId);
-    if (foundTask) {
-      this.taskRepository.delete(foundTask);
-    }
+  deleteTaskById(taskId: string): Promise<void> {
+    return this.taskRepository.deleteById(taskId);
   }
 
-  // updateTaskById(taskId: string, statusDto: UpdateTaskStatusDto) {
-  //   const { status } = statusDto;
-  //   const task = this.getTaskById(taskId);
-  //   task.status = status;
-  //   return task;
-  // }
+  updateTaskById(taskId: string, statusDto: UpdateTaskStatusDto): Promise<Task> {
+    return this.taskRepository.updateTaskById(taskId, statusDto);
+  }
 
-  async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
-    const { title, description } = createTaskDto;
-
-    const tasks = await this.getTasks();
-
-    const taskAlreadyExists = tasks.find(task => task.title === title);
-
-    if (taskAlreadyExists) {
-      throw new BadRequestException(`Task with ${title} title already exists`);
-    }
-
-    const task = this.taskRepository.create({
-      title,
-      description,
-      status: TaskStatus.OPEN
-    })
-    await this.taskRepository.save(task);
-
-    return task;
+  createTask(createTaskDto: CreateTaskDto): Promise<Task> {
+    return this.taskRepository.createTask(createTaskDto);
   }
 }
