@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { GetTasksFilterDto } from './dto/get-task-filter.dto';
 import { UpdateTaskStatusDto } from './dto/update-task.dto';
 import { Task } from './task.entity';
 import { TaskRepository } from './tasks.repository';
@@ -14,25 +15,9 @@ export class TasksService {
     return this.taskRepository.getTasks();
   }
 
-  // getTasksWithFilters(filterDto: GetTasksFilterDto): Task[] {
-  //   const { search, status } = filterDto;
-
-  //   let tasks: Task[] = this.getTasks();
-
-  //   if (status) {
-  //     tasks = tasks.filter(task => task.status === status);
-  //   }
-
-  //   if (search) {
-  //     tasks = tasks.filter(task => {
-  //       if (task.title.toLowerCase().includes(search) || task.description.includes(search)) {
-  //         return task;
-  //       }
-  //     });
-  //   }
-
-  //   return tasks;
-  // }
+  getTasksWithFilters(filterDto: GetTasksFilterDto): Promise<Task[]> {
+    return this.taskRepository.getTasksWithFilters(filterDto)
+  }
 
   getTaskById(id: string): Promise<Task> {
     return this.taskRepository.getById(id);
