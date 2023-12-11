@@ -12,8 +12,19 @@ export class TaskRepository extends Repository<Task> {
     super(Task, dataSource.createEntityManager());
   }
 
-  async getTasks(): Promise<Task[]> {
-    const tasks = await this.find();
+  async getTasks(filterDto?: GetTasksFilterDto): Promise<Task[]> {
+    const { status, search } = filterDto;
+    const query = this.createQueryBuilder('task');
+
+    if (status) {
+      query.andWhere('task.status = :status', { status: 'OPEN' });
+    }
+
+    if (search) {
+      query.andWhere('task.title LIKE :search OR task.description LIKE :search', { search: `%${search.toLowerCase()}%` });
+    }
+
+    const tasks = await query.getMany();
     return tasks;
   }
 
@@ -40,25 +51,6 @@ export class TaskRepository extends Repository<Task> {
     return found;
   }
 
-  async getTasksWithFilters(filterDto: GetTasksFilterDto): Promise<Task[]> {
-    const { status, search } = filterDto;
-
-    let tasks = await this.getTasks();
-    if (status) {
-      tasks = tasks.filter(task => task.status === status)
-    }
-
-    if (search) {
-      tasks = tasks.filter(task => {
-        if (task.title.toLowerCase().includes(search) || task.description.includes(search)) {
-          return task;
-        }
-      })
-    }
-
-    return tasks;
-  }
-
   async updateTaskById(taskId: string, statusDto: UpdateTaskStatusDto): Promise<Task> {
     const { status } = statusDto;
     const taskToUpdate = await this.getById(taskId);
@@ -71,9 +63,10 @@ export class TaskRepository extends Repository<Task> {
   }
 
   async deleteById(id: string): Promise<void> {
-    const foundTask = await this.getById(id);
-    if (foundTask) {
-      this.delete(foundTask);
+    const result = await this.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Task with ID "${id}" not found`);
     }
   }
 }
