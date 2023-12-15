@@ -13,7 +13,7 @@ services:
       - POSTGRES_DB=task_db
 
   pgadmin:
-    image: dpage/pgadmin4:4.23
+    image: dpage/pgadmin4:8.1
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
       PGADMIN_DEFAULT_PASSWORD: postgres
