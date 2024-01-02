@@ -14,7 +14,6 @@ import { TasksModule } from './tasks/tasks.module';
       database: 'task_db',
       autoLoadEntities: true,
       synchronize: true
-    }),
-    AuthModule],
+    })],
 })
 export class AppModule { }

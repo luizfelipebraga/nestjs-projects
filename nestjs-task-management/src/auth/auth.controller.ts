@@ -5,9 +5,7 @@ import { User } from './user.entity';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {
-    this.authService = authService;
-  };
+  constructor(private authService: AuthService) { }
 
   @Post('/signup')
   signUp(@Body() authCredentialsDto: AuthCredentialsDto): Promise<User> {

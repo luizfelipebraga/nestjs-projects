@@ -15,11 +15,8 @@ export class UserRepository extends Repository<User> {
     const { username, password } = authCredentialsDto;
 
     const query = this.createQueryBuilder('user');
-
-    if (username) {
-      query.andWhere('user.username = :username', { username: username });
-      throw new BadRequestException(`User with this username "${username}" already exists`);
-    }
+    const result = query.andWhere('user.username = :username', { username });
+    if (!result) throw new BadRequestException(`User with this username "${username}" already exists`);
 
     const user = this.create({
       username,
