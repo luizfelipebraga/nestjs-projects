@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { GetTasksFilterDto } from './dto/get-task-filter.dto';
@@ -30,6 +30,10 @@ export class TaskRepository extends Repository<Task> {
 
   async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
     const { title, description } = createTaskDto;
+
+    const taskAlreadyCreated = await this.findOneBy({ title })
+
+    if (taskAlreadyCreated) throw new ConflictException(`Task ${title} already exists`);
 
     const task = this.create({
       title,
