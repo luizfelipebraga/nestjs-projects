@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { ConflictException, Injectable, InternalServerErrorException } from "@nestjs/common";
+import * as bcrypt from "bcrypt";
 import { DataSource, Repository } from "typeorm";
 import { AuthCredentialsDto } from "./dtos/auth-credentials.dto";
 import { User } from "./user.entity";
@@ -10,20 +11,26 @@ export class UserRepository extends Repository<User> {
     super(User, dataSource.createEntityManager());
   }
 
-
   async createUser(authCredentialsDto: AuthCredentialsDto): Promise<User> {
-    const { username, password } = authCredentialsDto;
+    try {
+      const { username, password } = authCredentialsDto;
 
-    const query = this.createQueryBuilder('user');
-    const result = query.andWhere('user.username = :username', { username });
-    if (!result) throw new BadRequestException(`User with this username "${username}" already exists`);
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(password, salt)
 
-    const user = this.create({
-      username,
-      password
-    })
+      const user = this.create({
+        username,
+        password: hashedPassword
+      })
 
-    await this.save(user);
-    return user;
+      await this.save(user);
+      return user;
+
+    } catch (err) {
+      if (err.code === '23505') {
+        throw new ConflictException("Username already in use")
+      }
+      throw new InternalServerErrorException();
+    }
   }
 }
