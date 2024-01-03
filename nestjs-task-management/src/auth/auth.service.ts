@@ -1,8 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import { AuthCredentialsDto } from './dtos/auth-credentials.dto';
 import { User } from './user.entity';
 import { UserRepository } from './users.repository';
+import { bcryptCompare } from './utils/auth.bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -19,15 +19,11 @@ export class AuthService {
 
     const user = await this.userRepository.findOneBy({ username });
 
-    // const passwordsCompared = await bcryptCompare(user.password, password);
+    const matchPassword = await bcryptCompare(password, user.password);
 
-    if (user && (await bcrypt.compare(user.password, password))) {
+    if (user && matchPassword) {
       return 'success'
     }
-
-    // if (user && passwordsCompared) {
-    //   return 'success'
-    // }
 
     throw new UnauthorizedException('Please check your credentials');
   }
